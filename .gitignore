@@ -1,0 +1,20 @@
+# Flutter
+.dart_tool/
+.packages
+build/
+*.iml
+.idea/
+.metadata
+
+# Android
+*.apk
+*.aab
+local.properties
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+*.swp
+*.swo
