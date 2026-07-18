@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:file_picker/file_picker.dart' hide FileType;
+import 'package:file_picker/file_picker.dart' as fp;
 import '../models/document_model.dart';
 import '../services/file_parser.dart';
 import '../services/storage_service.dart';
@@ -58,7 +58,7 @@ class FileProvider extends StateNotifier<FileListState> {
   Future<void> pickFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
+        type: fp.FileType.custom,
         allowedExtensions: ['pdf', 'docx', 'doc'],
         allowMultiple: false,
       );

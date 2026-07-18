@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
@@ -21,11 +20,9 @@ class ReaderScreen extends ConsumerStatefulWidget {
 
 class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   final ScrollController _scrollController = ScrollController();
-  StreamSubscription? _paragraphSub;
 
   @override
   void dispose() {
-    _paragraphSub?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -47,8 +44,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
     // 获取当前朗读的段落索引
     final currentParaIndex = readingProgress?.paragraphIndex ?? 0;
-    final isPlaying = ttsService.isPlaying;
-    final isPaused = ttsService.isPaused;
 
     return Scaffold(
       appBar: AppBar(

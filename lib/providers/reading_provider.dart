@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/document_model.dart';
 import '../models/reading_state.dart';
 import '../services/storage_service.dart';
-import 'file_provider.dart';
 import 'tts_provider.dart';
 
 /// 阅读状态管理
