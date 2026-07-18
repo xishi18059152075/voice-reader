@@ -57,7 +57,7 @@ class FileProvider extends StateNotifier<FileListState> {
   /// 打开文件选择器
   Future<void> pickFile() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await fp.FilePicker.platform.pickFiles(
         type: fp.FileType.custom,
         allowedExtensions: ['pdf', 'docx', 'doc'],
         allowMultiple: false,
