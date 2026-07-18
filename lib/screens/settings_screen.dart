@@ -138,11 +138,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   // 区域
                   TextField(
                     controller: _regionController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: '区域 (Region)',
                       hintText: '如: eastasia, chinanorth2',
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.location_on),
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.location_on),
                     ),
                   ),
                   const SizedBox(height: 20),
