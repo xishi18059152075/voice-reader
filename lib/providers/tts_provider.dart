@@ -2,16 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/reading_state.dart';
 import '../services/tts_service.dart';
 
-/// TTS 状态管理
-class TtsProvider extends StateNotifier<TtsService> {
+/// TTS 鐘舵€佺鐞?class TtsProvider extends StateNotifier<TtsService> {
   TtsProvider() : super(TtsService());
 
-  /// 配置 Azure
+  /// 閰嶇疆 Azure
   void configure(String key, String region) {
     state.configure(key, region);
   }
 
-  /// 播放文本
+  /// 鎾斁鏂囨湰
   Future<void> speak(String text) async {
     try {
       await state.speak(text);
@@ -20,38 +19,39 @@ class TtsProvider extends StateNotifier<TtsService> {
     }
   }
 
-  /// 暂停
+  /// 鏆傚仠
   void pause() => state.pause();
 
-  /// 恢复
+  /// 鎭㈠
   void resume() => state.resume();
 
-  /// 停止
+  /// 鍋滄
   void stop() => state.stop();
 
-  /// 设置语速
-  void setSpeed(double speed) => state.setSpeed(speed);
+  /// 璁剧疆璇€?  void setSpeed(double speed) => state.setSpeed(speed);
 
-  /// 设置声音
+  /// 璁剧疆澹伴煶
   void setVoice(String voice) => state.setVoice(voice);
 
-  /// 设置情绪
+  /// 璁剧疆鎯呯华
   void setEmotion(EmotionStyle emotion) => state.setEmotion(emotion);
 
-  /// 获取当前情绪
+  /// 鑾峰彇褰撳墠鎯呯华
   EmotionStyle get currentEmotion => state.currentEmotion;
 
-  /// 跳转到段落
-  void seekToParagraph(int index) => state.seekToParagraph(index);
+  /// 鑾峰彇褰撳墠澹伴煶
+  String get currentVoice => state.currentVoice;
 
-  /// 是否正在播放
+  /// 鑾峰彇褰撳墠璇€?  double get currentSpeed => state.currentSpeed;
+
+  /// 璺宠浆鍒版钀?  void seekToParagraph(int index) => state.seekToParagraph(index);
+
+  /// 鏄惁姝ｅ湪鎾斁
   bool get isPlaying => state.isPlaying;
 
-  /// 是否已暂停
-  bool get isPaused => state.isPaused;
+  /// 鏄惁宸叉殏鍋?  bool get isPaused => state.isPaused;
 
-  /// 是否已停止
-  bool get isStopped => state.state == PlaybackState.stopped;
+  /// 鏄惁宸插仠姝?  bool get isStopped => state.state == PlaybackState.stopped;
 
   @override
   void dispose() {

@@ -11,8 +11,7 @@ import '../widgets/control_panel.dart';
 import '../widgets/emotion_selector.dart';
 import '../widgets/progress_indicator.dart';
 
-/// 阅读器页面
-class ReaderScreen extends ConsumerStatefulWidget {
+/// 闃呰鍣ㄩ〉闈?class ReaderScreen extends ConsumerStatefulWidget {
   const ReaderScreen({super.key});
 
   @override
@@ -40,13 +39,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
     if (document == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('阅读器')),
-        body: const Center(child: Text('没有打开文档')),
+        appBar: AppBar(title: const Text('闃呰鍣?)),
+        body: const Center(child: Text('娌℃湁鎵撳紑鏂囨。')),
       );
     }
 
-    // 获取当前朗读的段落索引
-    final currentParaIndex = readingProgress?.paragraphIndex ?? 0;
+    // 鑾峰彇褰撳墠鏈楄鐨勬钀界储寮?    final currentParaIndex = readingProgress?.paragraphIndex ?? 0;
     final isPlaying = ttsService.isPlaying;
     final isPaused = ttsService.isPaused;
 
@@ -61,21 +59,20 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           IconButton(
             icon: const Icon(Icons.tune_outlined),
             onPressed: () => _showSettingsDialog(context, document),
-            tooltip: '朗读设置',
+            tooltip: '鏈楄璁剧疆',
           ),
         ],
       ),
       body: Column(
         children: [
-          // 进度条
-          Padding(
+          // 杩涘害鏉?          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: ProgressIndicatorBar(
               currentParagraph: currentParaIndex + 1,
               totalParagraphs: document.paragraphCount,
             ),
           ),
-          // 文本内容
+          // 鏂囨湰鍐呭
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -113,7 +110,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 段落编号
+                        // 娈佃惤缂栧彿
                         SizedBox(
                           width: 32,
                           child: Text(
@@ -126,7 +123,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                             ),
                           ),
                         ),
-                        // 段落文本
+                        // 娈佃惤鏂囨湰
                         Expanded(
                           child: Text(
                             paragraph.text,
@@ -149,7 +146,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               },
             ),
           ),
-          // 底部控制面板
+          // 搴曢儴鎺у埗闈㈡澘
           ControlPanel(
             playbackState: ttsService.state,
             speed: ttsService.currentSpeed,
@@ -189,7 +186,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
-        String selectedVoice = tts.state.currentVoice;
+        String selectedVoice = tts.currentVoice;
         EmotionStyle selectedEmotion = currentEmotion;
 
         return StatefulBuilder(
@@ -201,18 +198,18 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '朗读设置',
+                    '鏈楄璁剧疆',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const SizedBox(height: 20),
-                  // 声音选择
-                  Text('选择声音',
+                  // 澹伴煶閫夋嫨
+                  Text('閫夋嫨澹伴煶',
                       style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: selectedVoice,
+                    initialValue: selectedVoice,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       contentPadding:
@@ -232,7 +229,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  // 情绪选择
+                  // 鎯呯华閫夋嫨
                   EmotionSelector(
                     currentEmotion: selectedEmotion,
                     onChanged: (emotion) {
@@ -245,7 +242,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('确定'),
+                      child: const Text('纭畾'),
                     ),
                   ),
                   const SizedBox(height: 8),

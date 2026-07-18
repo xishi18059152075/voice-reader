@@ -1,12 +1,11 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/file_picker.dart' hide FileType;
 import '../models/document_model.dart';
 import '../services/file_parser.dart';
 import '../services/storage_service.dart';
 
-/// 文件列表状态
-class FileListState {
+/// 鏂囦欢鍒楄〃鐘舵€?class FileListState {
   final List<String> recentFiles;
   final DocumentModel? currentDocument;
   final bool isLoading;
@@ -44,8 +43,7 @@ class FileProvider extends StateNotifier<FileListState> {
 
   Future<void> _loadRecentFiles() async {
     final files = await _storage.getRecentFiles();
-    // 过滤掉已删除的文件
-    final existingFiles = <String>[];
+    // 杩囨护鎺夊凡鍒犻櫎鐨勬枃浠?    final existingFiles = <String>[];
     for (final f in files) {
       if (await File(f).exists()) {
         existingFiles.add(f);
@@ -54,8 +52,7 @@ class FileProvider extends StateNotifier<FileListState> {
     state = state.copyWith(recentFiles: existingFiles);
   }
 
-  /// 打开文件选择器
-  Future<void> pickFile() async {
+  /// 鎵撳紑鏂囦欢閫夋嫨鍣?  Future<void> pickFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -70,12 +67,11 @@ class FileProvider extends StateNotifier<FileListState> {
         }
       }
     } catch (e) {
-      state = state.copyWith(error: '文件选择失败: $e');
+      state = state.copyWith(error: '鏂囦欢閫夋嫨澶辫触: $e');
     }
   }
 
-  /// 打开并解析文件
-  Future<void> openFile(String filePath) async {
+  /// 鎵撳紑骞惰В鏋愭枃浠?  Future<void> openFile(String filePath) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
@@ -89,17 +85,17 @@ class FileProvider extends StateNotifier<FileListState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: '文件解析失败: $e',
+        error: '鏂囦欢瑙ｆ瀽澶辫触: $e',
       );
     }
   }
 
-  /// 清除当前文档
+  /// 娓呴櫎褰撳墠鏂囨。
   void closeDocument() {
     state = state.copyWith(currentDocument: null);
   }
 
-  /// 清除错误信息
+  /// 娓呴櫎閿欒淇℃伅
   void clearError() {
     state = state.copyWith(clearError: true);
   }

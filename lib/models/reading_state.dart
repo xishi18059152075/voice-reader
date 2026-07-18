@@ -1,21 +1,20 @@
-/// 朗读状态枚举
-enum PlaybackState {
+/// 鏈楄鐘舵€佹灇涓?enum PlaybackState {
   stopped,
   playing,
   paused,
   loading,
 }
 
-/// 情感风格枚举
+/// 鎯呮劅椋庢牸鏋氫妇
 enum EmotionStyle {
-  calm('平静', 'calm', '适合叙述、说明类文章'),
-  cheerful('愉快', 'cheerful', '适合正面内容、故事'),
-  sad('悲伤', 'sad', '适合感伤内容'),
-  angry('愤怒', 'angry', '适合激烈内容'),
-  fearful('害怕', 'fearful', '适合悬疑内容'),
-  comfort('安慰', 'comfort', '适合温馨内容'),
-  serious('严肃', 'serious', '适合正式内容'),
-  empathy('共情', 'empathy', '适合情感内容');
+  calm('骞抽潤', 'calm', '閫傚悎鍙欒堪銆佽鏄庣被鏂囩珷'),
+  cheerful('鎰夊揩', 'cheerful', '閫傚悎姝ｉ潰鍐呭銆佹晠浜?),
+  sad('鎮蹭激', 'sad', '閫傚悎鎰熶激鍐呭'),
+  angry('鎰ゆ€?, 'angry', '閫傚悎婵€鐑堝唴瀹?),
+  fearful('瀹虫€?, 'fearful', '閫傚悎鎮枒鍐呭'),
+  comfort('瀹夋叞', 'comfort', '閫傚悎娓╅Θ鍐呭'),
+  serious('涓ヨ們', 'serious', '閫傚悎姝ｅ紡鍐呭'),
+  empathy('鍏辨儏', 'empathy', '閫傚悎鎯呮劅鍐呭');
 
   final String label;
   final String apiValue;
@@ -24,7 +23,7 @@ enum EmotionStyle {
   const EmotionStyle(this.label, this.apiValue, this.description);
 }
 
-/// 朗读进度
+/// 鏈楄杩涘害
 class ReadingProgress {
   final String filePath;
   final int paragraphIndex;
@@ -64,4 +63,24 @@ class ReadingProgress {
         voiceName: json['voiceName'] as String? ?? 'zh-CN-XiaoxiaoNeural',
         lastReadAt: DateTime.parse(json['lastReadAt'] as String),
       );
+
+  ReadingProgress copyWith({
+    String? filePath,
+    int? paragraphIndex,
+    int? positionInParagraph,
+    double? playbackSpeed,
+    String? emotionStyle,
+    String? voiceName,
+    DateTime? lastReadAt,
+  }) {
+    return ReadingProgress(
+      filePath: filePath ?? this.filePath,
+      paragraphIndex: paragraphIndex ?? this.paragraphIndex,
+      positionInParagraph: positionInParagraph ?? this.positionInParagraph,
+      playbackSpeed: playbackSpeed ?? this.playbackSpeed,
+      emotionStyle: emotionStyle ?? this.emotionStyle,
+      voiceName: voiceName ?? this.voiceName,
+      lastReadAt: lastReadAt ?? this.lastReadAt,
+    );
+  }
 }
