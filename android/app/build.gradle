@@ -6,7 +6,8 @@ plugins {
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
-if (keystorePropertiesFile.exists()) {
+def keystoreExists = keystorePropertiesFile.exists()
+if (keystoreExists) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
@@ -27,14 +28,14 @@ android {
     defaultConfig {
         applicationId = "com.voicereader.voice_reader"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
     }
 
     signingConfigs {
         create("release") {
-            storeFile = keystorePropertiesFile.exists() ? rootProject.file('app/upload-keystore.jks') : null
+            storeFile = keystoreExists ? rootProject.file('app/upload-keystore.jks') : null
             storePassword = keystoreProperties['storePassword']
             keyAlias = keystoreProperties['keyAlias']
             keyPassword = keystoreProperties['keyPassword']
@@ -44,8 +45,13 @@ android {
     buildTypes {
         release {
             debuggable = false
-            signingConfig = keystorePropertiesFile.exists() ? signingConfigs.getByName("release") : signingConfigs.debug
+            minifyEnabled = false
+            signingConfig = keystoreExists ? signingConfigs.getByName("release") : null
         }
+    }
+
+    packagingOptions {
+        exclude "DebugProbesKt.bin"
     }
 }
 

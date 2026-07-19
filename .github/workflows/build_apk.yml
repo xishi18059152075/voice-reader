@@ -42,10 +42,22 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK (properly signed, non-debuggable)
+      - name: Build APK (release mode, no debug artifacts)
         run: flutter build apk --release
 
-      - name: Re-sign with v1+v2+v3 (for HONOR compatibility)
+      - name: Strip DebugProbesKt.bin (Kotlin debug artifact)
+        run: |
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          # Remove DebugProbesKt.bin if it exists (Kotlin debug probe = detected as debug build by HONOR)
+          if unzip -l $APK | grep -q "DebugProbesKt.bin"; then
+            echo "⚠️ 发现 DebugProbesKt.bin，正在移除..."
+            zip -d $APK "DebugProbesKt.bin"
+            echo "✅ 已移除"
+          else
+            echo "✅ 无 DebugProbesKt.bin"
+          fi
+
+      - name: Re-sign with v1+v2+v3
         run: |
           APK=build/app/outputs/flutter-apk/app-release.apk
           SDK=$ANDROID_HOME
@@ -59,15 +71,31 @@ jobs:
             --v3-signing-enabled true \
             $APK
 
-      - name: Verify APK
+      - name: Final verification
         run: |
+          APK=build/app/outputs/flutter-apk/app-release.apk
           SDK=$ANDROID_HOME
           APKSIGNER=$(find $SDK/build-tools -name apksigner -type f | sort -r | head -1)
-          echo "=== 签名验证 ==="
-          $APKSIGNER verify --verbose build/app/outputs/flutter-apk/app-release.apk
+
+          echo "=== 1/4 签名验证 ==="
+          $APKSIGNER verify --verbose $APK
+
           echo ""
-          echo "=== APK 文件 ==="
-          ls -lh build/app/outputs/flutter-apk/app-release.apk
+          echo "=== 2/4 DebugProbesKt.bin 检查 ==="
+          if unzip -l $APK | grep -q "DebugProbesKt.bin"; then
+            echo "❌ DebugProbesKt.bin 仍然存在!"
+            exit 1
+          else
+            echo "✅ 已清理"
+          fi
+
+          echo ""
+          echo "=== 3/4 debuggable 检查 ==="
+          unzip -p $APK AndroidManifest.xml | strings | grep -i "debuggable" && echo "❌ 有 debuggable!" || echo "✅ 无 debuggable"
+
+          echo ""
+          echo "=== 4/4 APK 信息 ==="
+          ls -lh $APK
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
