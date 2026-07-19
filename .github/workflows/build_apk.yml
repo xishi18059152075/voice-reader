@@ -45,6 +45,20 @@ jobs:
       - name: Build APK (properly signed, non-debuggable)
         run: flutter build apk --release
 
+      - name: Re-sign with v1+v2+v3 (for HONOR compatibility)
+        run: |
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          SDK=$ANDROID_HOME
+          APKSIGNER=$(find $SDK/build-tools -name apksigner -type f | sort -r | head -1)
+          $APKSIGNER sign \
+            --ks android/app/upload-keystore.jks \
+            --ks-pass pass:android2024 \
+            --ks-key-alias upload \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            $APK
+
       - name: Verify APK
         run: |
           SDK=$ANDROID_HOME
