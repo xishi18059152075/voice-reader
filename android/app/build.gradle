@@ -4,6 +4,12 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.voicereader.voice_reader"
     compileSdk = flutter.compileSdkVersion
@@ -20,15 +26,24 @@ android {
 
     defaultConfig {
         applicationId = "com.voicereader.voice_reader"
-        minSdk = 21
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = keystorePropertiesFile.exists() ? rootProject.file('app/upload-keystore.jks') : null
+            storePassword = keystoreProperties['storePassword']
+            keyAlias = keystoreProperties['keyAlias']
+            keyPassword = keystoreProperties['keyPassword']
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            signingConfig = keystorePropertiesFile.exists() ? signingConfigs.getByName("release") : signingConfigs.debug
         }
     }
 }

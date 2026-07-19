@@ -26,41 +26,34 @@ jobs:
           channel: "stable"
           cache: true
 
+      - name: Generate keystore
+        run: |
+          keytool -genkey -v -keystore android/app/upload-keystore.jks \
+            -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android2024 -keypass android2024 \
+            -dname "CN=VoiceReader" -noprompt
+
+      - name: Create key.properties
+        run: |
+          echo "storePassword=android2024" > android/key.properties
+          echo "keyPassword=android2024" >> android/key.properties
+          echo "keyAlias=upload" >> android/key.properties
+
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK (release - unsigned)
+      - name: Build APK (properly signed, non-debuggable)
         run: flutter build apk --release
 
-      - name: Generate keystore
-        run: |
-          keytool -genkey -v -keystore release.jks \
-            -alias release -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass android -keypass android \
-            -dname "CN=VoiceReader" -noprompt
-
-      - name: Sign APK with apksigner
-        run: |
-          APK=build/app/outputs/flutter-apk/app-release.apk
-          echo "Before: $(ls -la $APK)"
-          SDK=$ANDROID_HOME
-          APKSIGNER=$(find $SDK/build-tools -name apksigner -type f | sort -r | head -1)
-          echo "Using apksigner: $APKSIGNER"
-          $APKSIGNER sign \
-            --ks release.jks \
-            --ks-pass pass:android \
-            --ks-key-alias release \
-            --v1-signing-enabled true \
-            --v2-signing-enabled true \
-            $APK
-          echo "After: $(ls -la $APK)"
-
-      - name: Verify signature
+      - name: Verify APK
         run: |
           SDK=$ANDROID_HOME
           APKSIGNER=$(find $SDK/build-tools -name apksigner -type f | sort -r | head -1)
           echo "=== 签名验证 ==="
           $APKSIGNER verify --verbose build/app/outputs/flutter-apk/app-release.apk
+          echo ""
+          echo "=== APK 文件 ==="
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
