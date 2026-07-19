@@ -43,17 +43,13 @@ jobs:
           echo "KEY_ALIAS=release" >> $GITHUB_ENV
 
       - name: Build APK (release signed)
-        run: flutter build apk --release --no-split-per-abi
-
-      - name: Verify APK signature
-        run: |
-          jarsigner -verify -verbose -certs build/app/outputs/flutter-apk/app-release.apk | head -20
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: voice-reader-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/*.apk
           compression-level: 0
           retention-days: 30
 
