@@ -4,13 +4,6 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
-def keystoreExists = keystorePropertiesFile.exists()
-if (keystoreExists) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-}
-
 android {
     namespace = "com.voicereader.voice_reader"
     compileSdk = 36
@@ -33,25 +26,11 @@ android {
         versionName = "1.0.0"
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = keystoreExists ? rootProject.file('app/upload-keystore.jks') : null
-            storePassword = keystoreProperties['storePassword']
-            keyAlias = keystoreProperties['keyAlias']
-            keyPassword = keystoreProperties['keyPassword']
-        }
-    }
-
     buildTypes {
         release {
             debuggable = false
-            minifyEnabled = false
-            signingConfig = keystoreExists ? signingConfigs.getByName("release") : null
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-    }
-
-    packagingOptions {
-        exclude "DebugProbesKt.bin"
     }
 }
 

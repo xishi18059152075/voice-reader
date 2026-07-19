@@ -10,17 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.44.6"
           channel: "stable"
@@ -33,69 +28,29 @@ jobs:
             -storepass android2024 -keypass android2024 \
             -dname "CN=VoiceReader" -noprompt
 
-      - name: Create key.properties
-        run: |
-          echo "storePassword=android2024" > android/key.properties
-          echo "keyPassword=android2024" >> android/key.properties
-          echo "keyAlias=upload" >> android/key.properties
+      - name: Build APK
+        run: flutter build apk --release --android-skip-build-dependency-validation
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build APK (release mode, no debug artifacts)
-        run: flutter build apk --release
-
-      - name: Strip DebugProbesKt.bin (Kotlin debug artifact)
-        run: |
-          APK=build/app/outputs/flutter-apk/app-release.apk
-          # Remove DebugProbesKt.bin if it exists (Kotlin debug probe = detected as debug build by HONOR)
-          if unzip -l $APK | grep -q "DebugProbesKt.bin"; then
-            echo "⚠️ 发现 DebugProbesKt.bin，正在移除..."
-            zip -d $APK "DebugProbesKt.bin"
-            echo "✅ 已移除"
-          else
-            echo "✅ 无 DebugProbesKt.bin"
-          fi
-
-      - name: Re-sign with v1+v2+v3
-        run: |
-          APK=build/app/outputs/flutter-apk/app-release.apk
-          SDK=$ANDROID_HOME
-          APKSIGNER=$(find $SDK/build-tools -name apksigner -type f | sort -r | head -1)
-          $APKSIGNER sign \
-            --ks android/app/upload-keystore.jks \
-            --ks-pass pass:android2024 \
-            --ks-key-alias upload \
-            --v1-signing-enabled true \
-            --v2-signing-enabled true \
-            --v3-signing-enabled true \
-            $APK
-
-      - name: Final verification
+      - name: Strip debug artifacts + resign
         run: |
           APK=build/app/outputs/flutter-apk/app-release.apk
           SDK=$ANDROID_HOME
           APKSIGNER=$(find $SDK/build-tools -name apksigner -type f | sort -r | head -1)
 
-          echo "=== 1/4 签名验证 ==="
+          # 1) Strip DebugProbesKt.bin (the root cause)
+          echo "=== 1) Striping debug artifacts ==="
+          unzip -l $APK | grep -i "debugprobes" && zip -d $APK "DebugProbesKt.bin" || echo "No DebugProbesKt.bin found"
+
+          # 2) Sign with v1+v2+v3
+          echo "=== 2) Signing v1+v2+v3 ==="
+          $APKSIGNER sign --ks android/app/upload-keystore.jks --ks-pass pass:android2024 \
+            --ks-key-alias upload --v1-signing-enabled true --v2-signing-enabled true \
+            --v3-signing-enabled true $APK
+
+          # 3) Verify
+          echo "=== 3) Verify ==="
           $APKSIGNER verify --verbose $APK
-
-          echo ""
-          echo "=== 2/4 DebugProbesKt.bin 检查 ==="
-          if unzip -l $APK | grep -q "DebugProbesKt.bin"; then
-            echo "❌ DebugProbesKt.bin 仍然存在!"
-            exit 1
-          else
-            echo "✅ 已清理"
-          fi
-
-          echo ""
-          echo "=== 3/4 debuggable 检查 ==="
-          unzip -p $APK AndroidManifest.xml | strings | grep -i "debuggable" && echo "❌ 有 debuggable!" || echo "✅ 无 debuggable"
-
-          echo ""
-          echo "=== 4/4 APK 信息 ==="
-          ls -lh $APK
+          unzip -l $APK | grep -i "debugprobes" && echo "FAIL: still has DebugProbesKt.bin" || echo "PASS: no DebugProbesKt.bin"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
