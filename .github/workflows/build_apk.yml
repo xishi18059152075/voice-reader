@@ -3,9 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [main, master]
-  pull_request:
-    branches: [main, master]
-  workflow_dispatch: # 手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -34,30 +32,39 @@ jobs:
       - name: Analyze code
         run: flutter analyze
 
-      - name: Build APK (release)
-        run: flutter build apk --release --split-per-abi
+      - name: Generate release keystore
+        run: |
+          keytool -genkey -v -keystore android/app/release.keystore \
+            -alias release -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass 123456 -keypass 123456 \
+            -dname "CN=VoiceReader, OU=App, O=VoiceReader, L=Beijing, ST=Beijing, C=CN" -noprompt
+          echo "KEYSTORE_PASSWORD=123456" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=123456" >> $GITHUB_ENV
+          echo "KEY_ALIAS=release" >> $GITHUB_ENV
 
-      - name: Upload APK artifacts
+      - name: Build APK (release signed)
+        run: flutter build apk --release --no-split-per-abi
+
+      - name: Verify APK signature
+        run: |
+          jarsigner -verify -verbose -certs build/app/outputs/flutter-apk/app-release.apk | head -20
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: voice-reader-apk
-          path: build/app/outputs/flutter-apk/*.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           compression-level: 0
           retention-days: 30
 
       - name: Generate release notes
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           echo "# 语音朗读助手 - 构建完成" > release_notes.md
           echo "" >> release_notes.md
           echo "- 构建时间: $(date '+%Y-%m-%d %H:%M:%S')" >> release_notes.md
-          echo "- 提交: ${{ github.sha }}" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "## APK 文件" >> release_notes.md
-          ls -la build/app/outputs/flutter-apk/ >> release_notes.md
+          echo "- 使用正式签名密钥" >> release_notes.md
 
       - name: Upload release notes
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: actions/upload-artifact@v4
         with:
           name: release-notes
